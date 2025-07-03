@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elegant Watch Animation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Playfair Display', serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+
+        .watch-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+        }
+
+        .watch {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle, #f8f9fa 0%, #e9ecef 100%);
+            border: 12px solid #343a40;
+            box-shadow: 
+                0 0 20px rgba(0, 0, 0, 0.2),
+                inset 0 0 15px rgba(0, 0, 0, 0.1),
+                0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .watch-face {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        .watch-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 16px;
+            height: 16px;
+            background: #343a40;
+            border-radius: 50%;
+            z-index: 10;
+        }
+
+        .hour-marks {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        .hour-mark {
+            position: absolute;
+            width: 3px;
+            height: 12px;
+            background: #343a40;
+            left: 50%;
+            transform-origin: 50% 150px;
+            transform: translateX(-50%);
+        }
+
+        .second-hand {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 2px;
+            height: 120px;
+            background: #dc3545;
+            transform-origin: 50% 0;
+            border-radius: 2px;
+            z-index: 7;
+            box-shadow: 0 0 5px rgba(220, 53, 69, 0.5);
+        }
+
+        .minute-hand {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 100px;
+            background: #343a40;
+            transform-origin: 50% 0;
+            border-radius: 4px;
+            z-index: 6;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .hour-hand {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 6px;
+            height: 70px;
+            background: #343a40;
+            transform-origin: 50% 0;
+            border-radius: 6px;
+            z-index: 5;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .brand-name {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            font-weight: bold;
+            color: #343a40;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .model-name {
+            position: absolute;
+            bottom: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .digital-time {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: monospace;
+            font-size: 18px;
+            color: #343a40;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+
+        @media (min-width: 640px) {
+            .watch-container {
+                width: 400px;
+                height: 400px;
+            }
+
+            .hour-mark {
+                transform-origin: 50% 200px;
+            }
+
+            .second-hand {
+                height: 160px;
+            }
+
+            .minute-hand {
+                height: 140px;
+            }
+
+            .hour-hand {
+                height: 100px;
+            }
+
+            .brand-name {
+                font-size: 16px;
+            }
+
+            .model-name {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="watch-container">
+        <div class="watch">
+            <div class="watch-face">
+                <div class="hour-marks" id="hour-marks"></div>
+                <div class="brand-name">Horologe</div>
+                <div class="model-name">Chronograph</div>
+                <div class="hour-hand" id="hour-hand"></div>
+                <div class="minute-hand" id="minute-hand"></div>
+                <div class="second-hand" id="second-hand"></div>
+                <div class="watch-center"></div>
+                <div class="digital-time" id="digital-time"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+            
+            // Calculate angles for clock hands
+            const secondsAngle = seconds * 6; // 6 degrees per second (360/60)
+            const minutesAngle = minutes * 6 + seconds * 0.1; // 0.1 degrees per second (6/60)
+            const hoursAngle = (hours % 12) * 30 + minutes * 0.5; // 30 degrees per hour, 0.5 per minute (30/60)
+            
+            // Apply rotations
+            document.getElementById('second-hand').style.transform = `rotate(${secondsAngle}deg)`;
+            document.getElementById('minute-hand').style.transform = `rotate(${minutesAngle}deg)`;
+            document.getElementById('hour-hand').style.transform = `rotate(${hoursAngle}deg)`;
+            
+            // Update digital time
+            const formattedHours = hours.toString().padStart(2, '0');
+            const formattedMinutes = minutes.toString().padStart(2, '0');
+            const formattedSeconds = seconds.toString().padStart(2, '0');
+            document.getElementById('digital-time').textContent = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+        }
+        
+        // Create hour marks
+        const hourMarks = document.getElementById('hour-marks');
+        for (let i = 0; i < 12; i++) {
+            const mark = document.createElement('div');
+            mark.className = 'hour-mark';
+            mark.style.transform = `translateX(-50%) rotate(${i * 30}deg)`;
+            hourMarks.appendChild(mark);
+        }
+        
+        // Update clock immediately and then every second
+        updateClock();
+        setInterval(updateClock, 1000);
+    </script>
+</body>
+</html>
+
